@@ -4,6 +4,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ## [Unreleased](https://github.com/Kampfkarren/selene/compare/0.27.1...HEAD)
 ### Added
 - Added `Path2DControlPoint.new` to the Roblox standard library
+- Added new [`roblox_manual_fromscale_or_fromoffset` lint](https://kampfkarren.github.io/selene/lints/roblox_manual_fromscale_or_fromoffset.html), which will warn when the arguments could be simplified to `UDim2.fromScale` or `UDim2.fromOffset`.
 
 ## [0.27.1](https://github.com/Kampfkarren/selene/releases/tag/0.27.1) - 2024-04-28
 ### Fixed
