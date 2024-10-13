@@ -643,6 +643,26 @@ fn start(mut options: opts::Options) {
 
     let pool = ThreadPool::new(options.num_threads);
 
+    // Directory for matching files pattern.
+    // If user provides a config file, we use that as our working directory, otherwise fallback to the current directory.
+    // The working directory needs to be an absolute path to match with paths in different directories.
+    let working_directory = config_directory.or_else(|| current_dir.canonicalize().ok());
+
+    let is_excluded = |path: &Path| -> bool {
+        if options.no_exclude {
+            return false;
+        }
+
+        // File pattern between the path we are checking and current working directory.
+        let file_pattern = working_directory.as_ref().and_then(|dir| {
+            path.canonicalize()
+                .ok()
+                .and_then(|path| pathdiff::diff_paths(path, dir))
+        });
+
+        file_pattern.is_some_and(|pattern| exclude_set.is_match(&pattern))
+    };
+
     for filename in &options.files {
         if filename == "-" {
             let checker = Arc::clone(&checker);
@@ -656,7 +676,7 @@ fn start(mut options: opts::Options) {
                     let checker = Arc::clone(&checker);
                     let filename = filename.to_owned();
 
-                    if !options.no_exclude && exclude_set.is_match(&filename) {
+                    if is_excluded(Path::new(&filename)) {
                         continue;
                     }
 
@@ -678,7 +698,7 @@ fn start(mut options: opts::Options) {
                         for entry in glob {
                             match entry {
                                 Ok(path) => {
-                                    if !options.no_exclude && exclude_set.is_match(&path) {
+                                    if is_excluded(&path) {
                                         continue;
                                     }
 
