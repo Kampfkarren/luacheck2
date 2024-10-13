@@ -512,6 +512,7 @@ fn start(mut options: opts::Options) {
 
     let (config, config_directory): (CheckerConfig<toml::value::Value>, Option<PathBuf>) =
         match options.config {
+            // User provides a config file. We must read it and report if it is misconfigured.
             Some(config_file) => {
                 let config_contents = match fs::read_to_string(&config_file) {
                     Ok(contents) => contents,
