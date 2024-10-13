@@ -523,10 +523,16 @@ fn start(mut options: opts::Options) {
                 };
 
                 match toml::from_str(&config_contents) {
-                    Ok(config) => (
-                        config,
-                        Path::new(&config_file).parent().map(Path::to_path_buf),
-                    ),
+                    Ok(config) => {
+                        // Get config directory to using absolute path.
+                        // There is case where `config = Some("selene.toml")`,
+                        // which returns `""`` when getting parent directory.
+                        let config_directory = Path::new(&config_file)
+                            .canonicalize()
+                            .ok()
+                            .and_then(|path| path.parent().map(|path| path.to_path_buf()));
+                        (config, config_directory)
+                    }
                     Err(error) => {
                         error!("Config file not in correct format: {}", error);
                         std::process::exit(1);
